@@ -2,7 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { EmailProvider } from "@/component/EmailState";
 import AuthGuard from "@/component/AuthGuard";
-
+import { Analytics } from '@vercel/analytics/next';
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -27,6 +27,7 @@ export default function RootLayout({ children }) {
         <AuthGuard />
         <EmailProvider>
            {children}
+           <Analytics />
         </EmailProvider>
        
       </body>
