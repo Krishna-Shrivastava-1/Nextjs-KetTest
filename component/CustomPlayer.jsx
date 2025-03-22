@@ -102,25 +102,25 @@ const VideoPlayer = ({ src, setcross }) => {
         videoRef.current.currentTime -= 10;
     };
 
-    const toggleFullScreen = () => {
-        if (!document.fullscreenElement) {
-            if (playerRef.current.requestFullscreen) {
-                playerRef.current.requestFullscreen();
-            } else if (playerRef.current.webkitRequestFullscreen) {
-                playerRef.current.webkitRequestFullscreen();
-            } else if (playerRef.current.mozRequestFullScreen) {
-                playerRef.current.mozRequestFullScreen();
-            }
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            } else if (document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-            }
-        }
-    };
+    // const toggleFullScreen = () => {
+    //     if (!document.fullscreenElement) {
+    //         if (playerRef.current.requestFullscreen) {
+    //             playerRef.current.requestFullscreen();
+    //         } else if (playerRef.current.webkitRequestFullscreen) {
+    //             playerRef.current.webkitRequestFullscreen();
+    //         } else if (playerRef.current.mozRequestFullScreen) {
+    //             playerRef.current.mozRequestFullScreen();
+    //         }
+    //     } else {
+    //         if (document.exitFullscreen) {
+    //             document.exitFullscreen();
+    //         } else if (document.webkitExitFullscreen) {
+    //             document.webkitExitFullscreen();
+    //         } else if (document.mozCancelFullScreen) {
+    //             document.mozCancelFullScreen();
+    //         }
+    //     }
+    // };
 
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -220,7 +220,43 @@ const VideoPlayer = ({ src, setcross }) => {
         }
     };
 
+    const toggleFullScreen = () => {
+        const videoElement = document.documentElement; // Select the whole document for fullscreen
 
+        if (!document.fullscreenElement) {
+            if (videoElement.requestFullscreen) {
+                videoElement.requestFullscreen().then(() => {
+                    setIsFullscreen(true);
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock("landscape").catch(err => console.log(err));
+                    }
+                });
+            } else if (videoElement.mozRequestFullScreen) {
+                videoElement.mozRequestFullScreen();
+                setIsFullscreen(true);
+            } else if (videoElement.webkitRequestFullscreen) {
+                videoElement.webkitRequestFullscreen();
+                setIsFullscreen(true);
+            } else if (videoElement.msRequestFullscreen) {
+                videoElement.msRequestFullscreen();
+                setIsFullscreen(true);
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                setIsFullscreen(false);
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+                setIsFullscreen(false);
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+                setIsFullscreen(false);
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+                setIsFullscreen(false);
+            }
+        }
+    };
 
     return (
         <div
