@@ -437,7 +437,7 @@ const VideoPlayer = ({ src, setcross }) => {
             </div>
             <div     style={{ paddingBottom: '10px', paddingLeft: '10px', paddingRight: '10px' }}
   className={`w-full absolute bg-black/60 p-2 rounded-md md:hidden flex flex-col items-center transition-all duration-300
-  ${isFullscreen ? "bottom-[8%]" : "-bottom-[8%]"} 
+  ${isFullscreen ? "bottom-[8%]" : "-bottom-[300px]"} 
   ${showControls || !isFullscreen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             >
                 <div className="flex items-center justify-center w-full">
