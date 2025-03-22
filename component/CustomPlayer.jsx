@@ -105,11 +105,15 @@ const VideoPlayer = ({ src, setcross }) => {
     const toggleFullScreen = () => {
         if (!document.fullscreenElement) {
             if (playerRef.current.requestFullscreen) {
-                playerRef.current.requestFullscreen();
+                playerRef.current.requestFullscreen().then(() => {
+                    lockLandscapeOnMobile();
+                });
             } else if (playerRef.current.webkitRequestFullscreen) {
                 playerRef.current.webkitRequestFullscreen();
+                lockLandscapeOnMobile();
             } else if (playerRef.current.mozRequestFullScreen) {
                 playerRef.current.mozRequestFullScreen();
+                lockLandscapeOnMobile();
             }
         } else {
             if (document.exitFullscreen) {
@@ -121,6 +125,16 @@ const VideoPlayer = ({ src, setcross }) => {
             }
         }
     };
+    
+    // Function to lock landscape mode on mobile devices
+    const lockLandscapeOnMobile = () => {
+        if (window.matchMedia("(max-width: 768px)").matches) {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock("landscape").catch(err => console.log("Orientation lock failed:", err));
+            }
+        }
+    };
+    
 
     useEffect(() => {
         const handleFullscreenChange = () => {
