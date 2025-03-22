@@ -67,33 +67,88 @@
 //   }
 // }
 
+// import { NextResponse } from 'next/server';
+
+// export async function GET(req) {
+//     const { searchParams } = new URL(req.url);
+//     const videoUrl = searchParams.get('url');
+
+//     if (!videoUrl) {
+//         return NextResponse.json({ error: 'Video URL is required' }, { status: 400 });
+//     }
+
+//     try {
+//         const response = await fetch(videoUrl, {
+//             headers: {
+//                 'Range': req.headers.get('Range') || 'bytes=0-',
+//             },
+//         });
+
+//         if (!response.ok) throw new Error(`Failed to fetch video: ${response.status}`);
+
+//         // Stream directly using NextResponse's ReadableStream
+//         return new NextResponse(response.body, {
+//             status: response.status,
+//             headers: {
+//                 'Content-Type': response.headers.get('Content-Type') || 'video/mp4',
+//                 'Content-Length': response.headers.get('Content-Length'),
+//                 'Content-Range': response.headers.get('Content-Range'),
+//                 'Accept-Ranges': 'bytes',
+//             },
+//         });
+//     } catch (error) {
+//         console.error('Error streaming video:', error);
+//         return NextResponse.json({ error: 'Error streaming video' }, { status: 500 });
+//     }
+// }
+
+
+
 import { NextResponse } from 'next/server';
 
 export async function GET(req) {
-    const { searchParams } = new URL(req.url);
-    const videoUrl = searchParams.get('url');
-
-    if (!videoUrl) {
-        return NextResponse.json({ error: 'Video URL is required' }, { status: 400 });
-    }
-
     try {
+        const { searchParams } = new URL(req.url);
+        const videoUrl = searchParams.get('url');
+
+        if (!videoUrl) {
+            return NextResponse.json({ error: 'Video URL is required' }, { status: 400 });
+        }
+
+        // Get Range header from request
+        const range = req.headers.get('Range') || 'bytes=0-';
+
+        // Fetch the video from the external source with range support
         const response = await fetch(videoUrl, {
-            headers: {
-                'Range': req.headers.get('Range') || 'bytes=0-',
-            },
+            headers: { 'Range': range },
         });
 
         if (!response.ok) throw new Error(`Failed to fetch video: ${response.status}`);
 
-        // Stream directly using NextResponse's ReadableStream
+        // Extract headers from the response
+        const contentType = response.headers.get('Content-Type') || 'video/mp4';
+        const contentLength = response.headers.get('Content-Length');
+        const contentRange = response.headers.get('Content-Range');
+
+        // If the response does not support range requests, return an error
+        if (!contentRange) {
+            console.warn('Video source does not support range requests properly.');
+            return NextResponse.json({ error: 'Video streaming not supported by source' }, { status: 500 });
+        }
+
+        // Ensure 206 Partial Content response for streaming
+        const status = response.status === 200 ? 206 : response.status;
+
+        // Stream video response back to the client
         return new NextResponse(response.body, {
-            status: response.status,
+            status,
             headers: {
-                'Content-Type': response.headers.get('Content-Type') || 'video/mp4',
-                'Content-Length': response.headers.get('Content-Length'),
-                'Content-Range': response.headers.get('Content-Range'),
+                'Content-Type': contentType,
+                'Content-Length': contentLength,
+                'Content-Range': contentRange,
                 'Accept-Ranges': 'bytes',
+                'Cache-Control': 'public, max-age=3600, immutable',
+                'Content-Encoding': 'identity', // Prevent encoding issues
             },
         });
     } catch (error) {
