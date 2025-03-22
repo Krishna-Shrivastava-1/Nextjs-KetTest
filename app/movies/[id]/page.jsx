@@ -53,12 +53,21 @@ const page = () => {
 
                         <div  >
                             <div style={{ width: '100%', aspectRatio: '16/9' }}> {/* Adjust aspectRatio as needed */}
-                                <Image
+                                {/* <Image
                                     src={clickedmovi?.mainmovieData[0]?.image}
                                     alt=""
                                     layout="responsive"
                                     width={16} // Aspect ratio width
                                     height={9} // Aspect ratio height
+                                    style={{ objectFit: 'cover' }} // Or objectFit: 'contain'
+                                    className='masker'
+                                /> */}
+                                <img
+                                    src={clickedmovi?.mainmovieData[0]?.image}
+                                    alt=""
+                                    
+                                  
+                                  
                                     style={{ objectFit: 'cover' }} // Or objectFit: 'contain'
                                     className='masker'
                                 />

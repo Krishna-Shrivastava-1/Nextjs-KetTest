@@ -18,7 +18,7 @@ const VideoPlayer = ({ src, setcross }) => {
     const [showsettings, setshowsettings] = useState(false)
 
     const [loading, setLoading] = useState(true); // State to manage loading
-
+// console.log(src)
     useEffect(() => {
         const video = videoRef.current;
 
@@ -313,8 +313,9 @@ const VideoPlayer = ({ src, setcross }) => {
                         width="100%"
                         height="100%"
                         autoPlay
-                        preload="auto"
+                        preload="metadata"
                         tabIndex={0}
+                        // type="video/mp4"
                         className="rounded-md object-contain w-full h-full"
                         onClick={() => {
                             togglePlayPause()

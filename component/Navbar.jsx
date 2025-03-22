@@ -56,7 +56,7 @@ const Navbar = () => {
     // Fetch movies on mount
 
 
-    console.log(movies)
+    // console.log(movies)
     const forfiltmovietitle = movies.map((e) => {
         return {
           title:  e?.aboutmovieData.title ?? "No Title",
@@ -65,11 +65,11 @@ const Navbar = () => {
         
         }; // "No Title" if e.title is undefined
     });
-    console.log(forfiltmovietitle)
+    // console.log(forfiltmovietitle)
     const searcher = forfiltmovietitle.filter((e)=>{
        return  e.title.toLowerCase().includes(querry.toLowerCase().trim())
     })
-    console.log(searcher)
+    // console.log(searcher)
     // useEffect(() => {
     //     allmovies();
     // }, []);
