@@ -99,7 +99,7 @@ const page = () => {
                 }
 
                 {
-                    isplayed ? <div className='  flex items-center justify-center'>
+                    isplayed ? <div className=' h-[97vh] flex items-center justify-center'>
                         <VideoPlayer setcross={setshowcross} src={`/api/video?url=${encodeURIComponent(finalmovUrl)}`} />
                     </div> : null
 
