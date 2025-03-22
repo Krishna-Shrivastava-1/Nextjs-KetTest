@@ -36,18 +36,7 @@ const VideoPlayer = ({ src, setcross }) => {
         const video = videoRef.current;
 
         if (Hls.isSupported()) {
-            const hls = new Hls({
-                liveSyncMaxLatencyDuration: 5,
-                maxBufferLength: 60,
-                maxMaxBufferLength: 120,
-                lowBufferWatchdogPeriod: 2,
-                highBufferWatchdogPeriod: 5,
-                fragLoadingMaxRetry: 5,
-                fragLoadingTimeOut: 20000,
-                abrBandwidthFactor: 0.9,
-                abrEwmaDefaultEstimate: 500000,
-                abrEwmaFastLive: 3.0,
-            });
+            const hls = new Hls();
             hls.loadSource(src);
             hls.attachMedia(video);
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -192,16 +181,10 @@ const VideoPlayer = ({ src, setcross }) => {
         const video = videoRef.current;
         if (Hls.isSupported()) {
             const hls = new Hls({
-                liveSyncMaxLatencyDuration: 5,
-                maxBufferLength: 60,
-                maxMaxBufferLength: 120,
-                lowBufferWatchdogPeriod: 2,
-                highBufferWatchdogPeriod: 5,
-                fragLoadingMaxRetry: 5,
-                fragLoadingTimeOut: 20000,
-                abrBandwidthFactor: 0.9,
-                abrEwmaDefaultEstimate: 500000,
-                abrEwmaFastLive: 3.0,
+                // Adjust buffer settings
+                liveSyncMaxLatencyDuration: 15, // buffer ahead 15 seconds
+                maxBufferLength: 60, // Maximum buffer length
+                maxMaxBufferLength: 120, // absolute max buffer length
             });
             hls.loadSource(src);
             hls.attachMedia(video);
