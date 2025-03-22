@@ -31,7 +31,7 @@ const page = () => {
 
     }, []);
 
-    console.log(movies)
+    // console.log(movies)
     const movieimagemergedaboutdat = movies.map((e) => {
         return {
             movieposter: e?.mainmovieData[0].image
@@ -50,7 +50,7 @@ const page = () => {
         };
     });
 
-    console.log(actupdmovieforsect);
+    // console.log(actupdmovieforsect);
     // Process genres and update loading state
     useEffect(() => {
         if (!movies || movies.length === 0) {
@@ -93,7 +93,7 @@ const page = () => {
     ];
 
     const filteredGenres = newArrOfGenres.filter((e) => allowedGenres.includes(e.trim()));
-    console.log(filteredGenres);
+    // console.log(filteredGenres);
     return (
         <div>
             <div className='w-full sticky top-0 z-50 bg-black/40'>
