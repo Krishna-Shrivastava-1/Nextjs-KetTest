@@ -102,25 +102,25 @@ const VideoPlayer = ({ src, setcross }) => {
         videoRef.current.currentTime -= 10;
     };
 
-    // const toggleFullScreen = () => {
-    //     if (!document.fullscreenElement) {
-    //         if (playerRef.current.requestFullscreen) {
-    //             playerRef.current.requestFullscreen();
-    //         } else if (playerRef.current.webkitRequestFullscreen) {
-    //             playerRef.current.webkitRequestFullscreen();
-    //         } else if (playerRef.current.mozRequestFullScreen) {
-    //             playerRef.current.mozRequestFullScreen();
-    //         }
-    //     } else {
-    //         if (document.exitFullscreen) {
-    //             document.exitFullscreen();
-    //         } else if (document.webkitExitFullscreen) {
-    //             document.webkitExitFullscreen();
-    //         } else if (document.mozCancelFullScreen) {
-    //             document.mozCancelFullScreen();
-    //         }
-    //     }
-    // };
+    const toggleFullScreenpc = () => {
+        if (!document.fullscreenElement) {
+            if (playerRef.current.requestFullscreen) {
+                playerRef.current.requestFullscreen();
+            } else if (playerRef.current.webkitRequestFullscreen) {
+                playerRef.current.webkitRequestFullscreen();
+            } else if (playerRef.current.mozRequestFullScreen) {
+                playerRef.current.mozRequestFullScreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            }
+        }
+    };
 
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -221,14 +221,18 @@ const VideoPlayer = ({ src, setcross }) => {
     };
 
     const toggleFullScreen = () => {
-        const videoElement = document.documentElement; // Select the whole document for fullscreen
+        const videoElement = videoRef.current; // Select video element
 
         if (!document.fullscreenElement) {
             if (videoElement.requestFullscreen) {
                 videoElement.requestFullscreen().then(() => {
                     setIsFullscreen(true);
-                    if (screen.orientation && screen.orientation.lock) {
-                        screen.orientation.lock("landscape").catch(err => console.log(err));
+
+                    // Lock orientation only on mobile devices
+                    if (window.matchMedia("(max-width: 768px)").matches) {
+                        if (screen.orientation && screen.orientation.lock) {
+                            screen.orientation.lock("landscape").catch(err => console.log(err));
+                        }
                     }
                 });
             } else if (videoElement.mozRequestFullScreen) {
@@ -257,6 +261,7 @@ const VideoPlayer = ({ src, setcross }) => {
             }
         }
     };
+
 
     return (
         <div
@@ -409,7 +414,7 @@ const VideoPlayer = ({ src, setcross }) => {
                             </div>}
                         </div>
 
-                        <button className="cursor-pointer select-none" onClick={toggleFullScreen}>{isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}</button>
+                        <button className="cursor-pointer select-none" onClick={toggleFullScreenpc}>{isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}</button>
 
 
                     </div>
@@ -435,8 +440,8 @@ const VideoPlayer = ({ src, setcross }) => {
                 {/* Subtitle Selection */}
 
             </div>
-            <div     style={{ paddingBottom: '10px', paddingLeft: '10px', paddingRight: '10px' }}
-  className={`w-full bg-black/60 p-2 rounded-md md:hidden flex flex-col items-center transition-all duration-300
+            <div style={{ paddingBottom: '10px', paddingLeft: '10px', paddingRight: '10px' }}
+                className={`w-full bg-black/60 p-2 rounded-md md:hidden flex flex-col items-center transition-all duration-300
   ${isFullscreen ? " absolute bottom-[8%]" : "bottom-0"} 
   ${showControls || !isFullscreen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             >

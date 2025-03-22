@@ -50,8 +50,26 @@ const Navbar = () => {
 
     }, []);
 
-    console.log(movies)
 
+
+
+    // Fetch movies on mount
+
+
+    console.log(movies)
+    const forfiltmovietitle = movies.map((e) => {
+        return {
+          title:  e?.aboutmovieData.title ?? "No Title",
+          imageuri:e?.mainmovieData[0].image ?? "No image",
+          ids:e?._id
+        
+        }; // "No Title" if e.title is undefined
+    });
+    console.log(forfiltmovietitle)
+    const searcher = forfiltmovietitle.filter((e)=>{
+       return  e.title.toLowerCase().includes(querry.toLowerCase().trim())
+    })
+    console.log(searcher)
     // useEffect(() => {
     //     allmovies();
     // }, []);
@@ -158,9 +176,9 @@ const Navbar = () => {
                                         querry && (
                                             searcher.length > 0 ? ( // Check if searcher array has any items
                                                 searcher.map((e, index) => (
-                                                    <div style={{ margin: '3px' }} onClick={() => router.push(`/movies/${e.datid}`)} key={index} className='w-full  flex flex-col items-center gap-2'>
+                                                    <div style={{ margin: '3px' }} onClick={() => router.push(`/movies/${e.ids}`)} key={index} className='w-full  flex flex-col items-center gap-2'>
                                                         <div className='flex items-center justify-start select-none cursor-pointer hover:bg-neutral-950  w-full'>
-                                                            <img style={{ margin: "12px" }} className='w-[200px] rounded-md' src={e.image} alt="" />
+                                                            <img style={{ margin: "12px" }} className='w-[200px] rounded-md' src={e.imageuri} alt="" />
                                                             <h3>{e.title}</h3>
                                                         </div>
                                                         <hr />
