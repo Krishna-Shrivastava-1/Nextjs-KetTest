@@ -75,7 +75,7 @@ const page = () => {
                                         <p style={{ padding: '3px', paddingLeft: '4px', paddingRight: '4px' }} className='bg-zinc-800/80 cursor-pointer select-none rounded-md text-nowrap'>{clickedmovi && clickedmovi?.aboutmovieData?.ua}</p>
                                     </div>
                                     <div className='flex items-center justify-start'>
-                                        {/* <p className='text-lg font-semibold'>{e && e.genre}</p> */}
+                                        <p className='text-lg font-semibold'>{clickedmovi && clickedmovi?.aboutmovieData?.genre}</p>
 
                                     </div>
                                     <div onClick={() => setisplayed(true)} style={{ padding: '6px', paddingLeft: '6px', paddingRight: '6px' }} className='bg-zinc-400/60 w-[120px] cursor-pointer select-none flex items-center justify-around rounded-md hover:bg-white hover:text-black transition-all duration-500'>
