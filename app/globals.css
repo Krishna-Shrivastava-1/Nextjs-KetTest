@@ -42,7 +42,9 @@ body {
   scroll-behavior: smooth;
 
 }
-
+.fullscreen-landscape {
+  @apply rotate-90;
+}
 :root {
   --radius: 0.625rem;
   --card: oklch(1 0 0);

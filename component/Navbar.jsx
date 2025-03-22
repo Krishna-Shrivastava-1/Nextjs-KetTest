@@ -6,16 +6,24 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Search } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 const Navbar = () => {
-    // const jwt = localStorage.getItem('authtoken');
-    
-   
-    const [movies, setmovies] = useState([]);
-    const [aboutmovies, setaboutmovies] = useState([]);
-    const [mainmovieurl, setmainmovieurl] = useState([]);
+    const [jwt, setJwt] = useState(null);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            // Check if window is defined (client-side)
+            const token = localStorage.getItem('authtoken');
+            setJwt(token);
+        }
+    }, []);
+
+
+    const [movies, setMovies] = useState([]);
     const [querry, setquerry] = useState('');
     const [paycred, setpaycred] = useState(null); // Initialize paycred as null
     const [user, setuser] = useState(null); // Initialize user as null
+    const [loading, setLoading] = useState(false)
     const router = useRouter();
     const pathname = usePathname();
     // const allmovies = async () => {
@@ -23,78 +31,74 @@ const Navbar = () => {
     //     setmovies(res.data);
     // };
 
-    const maindata = async () => {
-        const aboutmovdata = movies.map(async (mo) => {
-            if (mo.aboutmovieurl) {
-                const res = await axios.get(mo.aboutmovieurl);
-                return res.data;
-            } else {
-                return null;
-            }
-        });
-        const actaboutmovie = await Promise.all(aboutmovdata);
-        const mainmovdata = movies.map(async (mo) => {
-            if (mo.mainmovieurl) {
-                const res = await axios.get(mo.mainmovieurl);
-                return res.data;
-            } else {
-                return null;
-            }
-        });
-        const actmainmovie = await Promise.all(mainmovdata);
-        setaboutmovies(actaboutmovie.filter(item => item !== null));
-        setmainmovieurl(actmainmovie.filter(item => item !== null).flat(1));
+    const allMovies = async () => {
+        setLoading(true); // Set loading before fetching
+        try {
+            const res = await axios.get('/api/movies/fetchmoviedata');
+            setMovies(res.data.movies);
+        } catch (error) {
+            console.error("Error fetching movies:", error);
+        }
     };
+
+
+
+
+    // Fetch movies on mount
+    useEffect(() => {
+        allMovies();
+
+    }, []);
+
+    console.log(movies)
 
     // useEffect(() => {
     //     allmovies();
     // }, []);
 
+   
+
     useEffect(() => {
-        maindata();
-    }, [movies]);
+        if (jwt) {
+            const parts = jwt.split('.');
+            if (parts.length === 3) {
+                try {
+                    const payload = JSON.parse(atob(parts[1].replace('-', '+').replace('_', '/')));
+                    setpaycred(payload);
+                } catch (error) {
+                    console.error('Error decoding JWT:', error);
+                }
+            } else {
+                console.error('Invalid JWT format');
+            }
+        }
+    }, [jwt]);
 
-    // useEffect(() => {
-    //     if (jwt) {
-    //         const parts = jwt.split('.');
-    //         if (parts.length === 3) {
-    //             try {
-    //                 const payload = JSON.parse(atob(parts[1].replace('-', '+').replace('_', '/')));
-    //                 setpaycred(payload);
-    //             } catch (error) {
-    //                 console.error('Error decoding JWT:', error);
-    //             }
-    //         } else {
-    //             console.error('Invalid JWT format');
-    //         }
-    //     }
-    // }, [jwt]);
+    useEffect(() => {
+        const loggeduser = async () => {
+            if (paycred && paycred.id) {
+                try {
+                    const reps = await axios.get(`/api/auth/getuserbyid/${paycred?.id}`);
+                    setuser(reps.data);
+                } catch (error) {
+                    console.error('Error fetching user:', error);
+                }
+            }
+        };
+        loggeduser();
+    }, [paycred]);
+    // console.log(user)
+    // const newim = mainmovieurl.map((e) => e.image);
 
-    // useEffect(() => {
-    //     const loggeduser = async () => {
-    //         if (paycred && paycred.id) {
-    //             try {
-    //                 const reps = await axios.get(`http://localhost:5050/auth/getuser/${paycred.id}`);
-    //                 setuser(reps.data);
-    //             } catch (error) {
-    //                 console.error('Error fetching user:', error);
-    //             }
-    //         }
-    //     };
-    //     loggeduser();
-    // }, [paycred]);
+    // const merarry = aboutmovies.map((e, index) => ({
+    //     ...e,
+    //     image: newim[index],
+    //     datid: movies[index]?._id,
+    // }));
 
-    const newim = mainmovieurl.map((e) => e.image);
+    // const filter = merarry.filter((e) => e);
 
-    const merarry = aboutmovies.map((e, index) => ({
-        ...e,
-        image: newim[index],
-        datid: movies[index]?._id,
-    }));
-
-    const filter = merarry.filter((e) => e);
-
-    const searcher = filter.filter((e) => e.title?.toLowerCase().trim().includes(querry.toLowerCase()));
+    // const searcher = filter.filter((e) => e.title?.toLowerCase().trim().includes(querry.toLowerCase()));
 
     const logout = () => {
         localStorage.removeItem('authtoken');
@@ -171,13 +175,26 @@ const Navbar = () => {
 
                             </div>
                             <div onClick={() => router.push('/search')} className='sm:hidden block'><Search className="text-zinc-400 cursor-pointer" /></div>
-                            <div className='relative group'>
-                                <img className='w-9 select-none cursor-pointer' src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRKNdKRIgbcMkyGq1cQeq40IA-IQS-FDWnTQ&s" alt="" />
-                                <div style={{ padding: '10px' }} className='bg-zinc-800 hidden transition-all duration-300 group-hover:block absolute -bottom-17 -left-12'>
+                            {/* <div  className='relative group'> */}
+                            {/* <img className='w-9 select-none cursor-pointer' src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRKNdKRIgbcMkyGq1cQeq40IA-IQS-FDWnTQ&s" alt="" /> */}
+                            {/* <div onClick={()=>setshowpop(true)} style={{ padding: '10px' }} className='bg-zinc-800 hidden transition-all duration-300 group-hover:block absolute -bottom-17 -left-21'>
                                     <p>{user?.user.email}</p>
                                     <p onClick={logout} className='hover:underline cursor-pointer select-none'>Logout</p>
-                                </div>
-                            </div>
+                                </div> */}
+
+                            <DropdownMenu>
+                                <DropdownMenuTrigger><Image width={36} height={36} className='w-9 select-none cursor-pointer' src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRKNdKRIgbcMkyGq1cQeq40IA-IQS-FDWnTQ&s" alt="" /></DropdownMenuTrigger>
+                                <DropdownMenuContent className={`bg-zinc-800 text-zinc-200 border-zinc-700`}>
+                                    <DropdownMenuLabel style={{ padding: '4px' }} className={`text-zinc-200`}>My Account</DropdownMenuLabel>
+                                    <DropdownMenuSeparator className={`bg-zinc-700`} />
+                                    <DropdownMenuItem style={{ padding: '4px' }} className="hover:bg-zinc-600 "> <p>{user?.user.email}</p></DropdownMenuItem>
+                                    <DropdownMenuItem style={{ padding: '4px' }} className="hover:bg-zinc-600 hover:underline cursor-pointer select-none" onClick={logout}><p className=' cursor-pointer select-none'>Logout</p></DropdownMenuItem>
+                                    {/* <DropdownMenuItem className="dark:hover:bg-zinc-700">Team</DropdownMenuItem>
+    <DropdownMenuItem className="dark:hover:bg-zinc-700">Subscription</DropdownMenuItem> */}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            {/* </div> */}
+
 
                         </div>
                         : null

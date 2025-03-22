@@ -16,15 +16,15 @@ const VideoPlayer = ({ src, setcross }) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(true);
     const [showsettings, setshowsettings] = useState(false)
-    
+
     const [loading, setLoading] = useState(true); // State to manage loading
 
     useEffect(() => {
         const video = videoRef.current;
-        
+
         video.addEventListener("waiting", () => setLoading(true)); // When buffering
         video.addEventListener("canplay", () => setLoading(false)); // When ready
-        
+
         return () => {
             video.removeEventListener("waiting", () => setLoading(true));
             video.removeEventListener("canplay", () => setLoading(false));
@@ -125,6 +125,11 @@ const VideoPlayer = ({ src, setcross }) => {
     useEffect(() => {
         const handleFullscreenChange = () => {
             setIsFullscreen(!!document.fullscreenElement);
+            if (document.fullscreenElement) {
+                playerRef.current.classList.add("fullscreen-landscape");
+            } else {
+                playerRef.current.classList.remove("fullscreen-landscape");
+            }
         };
 
         document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -150,7 +155,9 @@ const VideoPlayer = ({ src, setcross }) => {
 
         }, 3000);
     };
-    setcross(showControls)
+    useEffect(() => {
+        setcross(showControls);
+    }, [showControls, setcross]);
     const [audioTracks, setAudioTracks] = useState([]);
     const [qualityLevels, setQualityLevels] = useState([]);
     const [subtitleTracks, setSubtitleTracks] = useState([]);
@@ -159,7 +166,12 @@ const VideoPlayer = ({ src, setcross }) => {
     useEffect(() => {
         const video = videoRef.current;
         if (Hls.isSupported()) {
-            const hls = new Hls();
+            const hls = new Hls({
+                // Adjust buffer settings
+                liveSyncMaxLatencyDuration: 15, // buffer ahead 15 seconds
+                maxBufferLength: 60, // Maximum buffer length
+                maxMaxBufferLength: 120, // absolute max buffer length
+            });
             hls.loadSource(src);
             hls.attachMedia(video);
 
@@ -167,6 +179,7 @@ const VideoPlayer = ({ src, setcross }) => {
                 setAudioTracks(hls.audioTracks);
                 setQualityLevels(hls.levels);
             });
+
 
             hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_, data) => {
                 setAudioTracks(data.audioTracks);
@@ -216,12 +229,12 @@ const VideoPlayer = ({ src, setcross }) => {
             onMouseMove={handleMouseMove}
 
         >
-              {/* Loader Overlay */}
-        {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                <LoaderCircle  size={60} className="animate-spin text-red-700" />
-            </div>
-        )}
+            {/* Loader Overlay */}
+            {loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <LoaderCircle size={60} className="animate-spin text-red-700" />
+                </div>
+            )}
 
             {
                 showsettings ?
@@ -229,7 +242,7 @@ const VideoPlayer = ({ src, setcross }) => {
                         ref={videoRef}
                         width="100%"
                         height="100%"
-                        tabIndex={0} 
+                        tabIndex={0}
                         className="rounded-md object-contain w-full h-full"
                         onClick={() => {
 
@@ -246,7 +259,7 @@ const VideoPlayer = ({ src, setcross }) => {
                         height="100%"
                         autoPlay
                         preload="auto"
-                        tabIndex={0} 
+                        tabIndex={0}
                         className="rounded-md object-contain w-full h-full"
                         onClick={() => {
                             togglePlayPause()
@@ -386,9 +399,10 @@ const VideoPlayer = ({ src, setcross }) => {
                 {/* Subtitle Selection */}
 
             </div>
-            <div style={{ paddingBottom: '10px', paddingLeft: '10px', paddingRight: '10px' }}
-                className={` bottom-0 w-full bg-black/60 p-2 rounded-md md:hidden flex flex-col items-center transition-all duration-300 
-        ${showControls || !isFullscreen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+            <div     style={{ paddingBottom: '10px', paddingLeft: '10px', paddingRight: '10px' }}
+  className={`w-full bg-black/60 p-2 rounded-md md:hidden flex flex-col items-center transition-all duration-300
+  ${isFullscreen ? "bottom-12" : "bottom-0"} 
+  ${showControls || !isFullscreen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             >
                 <div className="flex items-center justify-center w-full">
                     <input
