@@ -102,7 +102,7 @@ const VideoPlayer = ({ src, setcross }) => {
         videoRef.current.currentTime -= 10;
     };
 
-    const toggleFullScreenpc = () => {
+    const toggleFullScreen = () => {
         if (!document.fullscreenElement) {
             if (playerRef.current.requestFullscreen) {
                 playerRef.current.requestFullscreen();
@@ -220,47 +220,47 @@ const VideoPlayer = ({ src, setcross }) => {
         }
     };
 
-    const toggleFullScreen = () => {
-        const videoElement = videoRef.current; // Select video element
+    // const toggleFullScreen = () => {
+    //     const videoElement = videoRef.current; // Select video element
 
-        if (!document.fullscreenElement) {
-            if (videoElement.requestFullscreen) {
-                videoElement.requestFullscreen().then(() => {
-                    setIsFullscreen(true);
+    //     if (!document.fullscreenElement) {
+    //         if (videoElement.requestFullscreen) {
+    //             videoElement.requestFullscreen().then(() => {
+    //                 setIsFullscreen(true);
 
-                    // Lock orientation only on mobile devices
-                    if (window.matchMedia("(max-width: 768px)").matches) {
-                        if (screen.orientation && screen.orientation.lock) {
-                            screen.orientation.lock("landscape").catch(err => console.log(err));
-                        }
-                    }
-                });
-            } else if (videoElement.mozRequestFullScreen) {
-                videoElement.mozRequestFullScreen();
-                setIsFullscreen(true);
-            } else if (videoElement.webkitRequestFullscreen) {
-                videoElement.webkitRequestFullscreen();
-                setIsFullscreen(true);
-            } else if (videoElement.msRequestFullscreen) {
-                videoElement.msRequestFullscreen();
-                setIsFullscreen(true);
-            }
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-                setIsFullscreen(false);
-            } else if (document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-                setIsFullscreen(false);
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-                setIsFullscreen(false);
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
-                setIsFullscreen(false);
-            }
-        }
-    };
+    //                 // Lock orientation only on mobile devices
+    //                 if (window.matchMedia("(max-width: 768px)").matches) {
+    //                     if (screen.orientation && screen.orientation.lock) {
+    //                         screen.orientation.lock("landscape").catch(err => console.log(err));
+    //                     }
+    //                 }
+    //             });
+    //         } else if (videoElement.mozRequestFullScreen) {
+    //             videoElement.mozRequestFullScreen();
+    //             setIsFullscreen(true);
+    //         } else if (videoElement.webkitRequestFullscreen) {
+    //             videoElement.webkitRequestFullscreen();
+    //             setIsFullscreen(true);
+    //         } else if (videoElement.msRequestFullscreen) {
+    //             videoElement.msRequestFullscreen();
+    //             setIsFullscreen(true);
+    //         }
+    //     } else {
+    //         if (document.exitFullscreen) {
+    //             document.exitFullscreen();
+    //             setIsFullscreen(false);
+    //         } else if (document.mozCancelFullScreen) {
+    //             document.mozCancelFullScreen();
+    //             setIsFullscreen(false);
+    //         } else if (document.webkitExitFullscreen) {
+    //             document.webkitExitFullscreen();
+    //             setIsFullscreen(false);
+    //         } else if (document.msExitFullscreen) {
+    //             document.msExitFullscreen();
+    //             setIsFullscreen(false);
+    //         }
+    //     }
+    // };
 
 
     return (
@@ -414,7 +414,7 @@ const VideoPlayer = ({ src, setcross }) => {
                             </div>}
                         </div>
 
-                        <button className="cursor-pointer select-none" onClick={toggleFullScreenpc}>{isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}</button>
+                        <button className="cursor-pointer select-none" onClick={toggleFullScreen}>{isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}</button>
 
 
                     </div>

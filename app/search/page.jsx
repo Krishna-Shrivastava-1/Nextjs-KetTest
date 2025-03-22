@@ -137,7 +137,7 @@ const page = () => {
                 {
                     pathname !== '/' && pathname !== '/login' ?
                         <div className='flex flex-col items-center justify-around w-full gap-x-3'>
-                            <div style={{ padding: '4px' }} className=" sticky top-0 z-40 flex bg-black/60 backdrop-blur-lg group rounded-sm items-center gap-x-2  w-full p-1">
+                            <div style={{ padding: '15px' }} className=" sticky top-0 z-40 flex bg-black/60 backdrop-blur-lg group rounded-sm items-center gap-x-2  w-full p-1">
                                 {/* Search Icon */}
                                 <CircleArrowLeft  className="text-zinc-400 cursor-pointer" onClick={handleGoBack} />
                                 <Search className="text-zinc-400 cursor-pointer" />
