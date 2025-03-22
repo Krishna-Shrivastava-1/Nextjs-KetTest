@@ -435,10 +435,16 @@ const VideoPlayer = ({ src, setcross }) => {
                 {/* Subtitle Selection */}
 
             </div>
-            <div     style={{ paddingBottom: '10px', paddingLeft: '10px', paddingRight: '10px' }}
-  className={`w-full bg-black/60 p-2 rounded-md md:hidden flex flex-col items-center transition-all duration-300
-  ${isFullscreen ? "bottom-12" : "bottom-0"} 
-  ${showControls || !isFullscreen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+            <div     style={{
+        paddingBottom: '10px',
+        paddingLeft: '10px',
+        paddingRight: '10px',
+        top: isFullscreen ? 'env(safe-area-inset-top)' : 'auto', // Top in fullscreen, auto otherwise
+        bottom: isFullscreen ? 'auto' : 'env(safe-area-inset-bottom)', // Auto in fullscreen, bottom otherwise
+    }}
+    className={`w-full bg-black/60 p-2 rounded-md md:hidden flex flex-col items-center transition-all duration-300 ${
+        showControls || !isFullscreen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+    }`}
             >
                 <div className="flex items-center justify-center w-full">
                     <input
