@@ -42,7 +42,7 @@ const Editmovie = () => {
             aboutmovieurl:abouturl,
             movieimageurl
         })
-        console.log("edited")
+        // console.log("edited")
     }
     return (
         <div>

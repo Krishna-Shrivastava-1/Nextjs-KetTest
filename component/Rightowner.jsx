@@ -61,12 +61,12 @@ const Rightowner = () => {
    ids:e?._id
   }
  })
- console.log(movieaboutarray)
+//  console.log(movieaboutarray)
   const searcher = movieaboutarray.filter((e) =>
       e?.aboutdat?.title?.toLowerCase().trim().includes(querry.toLowerCase())
   );
-console.log(movies)
-console.log(searcher)
+// console.log(movies)
+// console.log(searcher)
   return (
     <div style={{ padding: '4px' }} className="w-full ">
       <div className="flex items-center justify-around">
