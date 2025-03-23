@@ -7,9 +7,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Search } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { useEmail } from './EmailState';
 const Navbar = () => {
     const [jwt, setJwt] = useState(null);
-
+const {movies}  =useEmail()
     useEffect(() => {
         if (typeof window !== 'undefined') {
             // Check if window is defined (client-side)
@@ -19,7 +20,7 @@ const Navbar = () => {
     }, []);
 
 
-    const [movies, setMovies] = useState([]);
+    // const [movies, setMovies] = useState([]);
     const [querry, setquerry] = useState('');
     const [paycred, setpaycred] = useState(null); // Initialize paycred as null
     const [user, setuser] = useState(null); // Initialize user as null
@@ -31,24 +32,24 @@ const Navbar = () => {
     //     setmovies(res.data);
     // };
 
-    const allMovies = async () => {
-        setLoading(true); // Set loading before fetching
-        try {
-            const res = await axios.get('/api/movies/fetchmoviedata');
-            setMovies(res.data.movies);
-        } catch (error) {
-            console.error("Error fetching movies:", error);
-        }
-    };
+    // const allMovies = async () => {
+    //     setLoading(true); // Set loading before fetching
+    //     try {
+    //         const res = await axios.get('/api/movies/fetchmoviedata');
+    //         setMovies(res.data.movies);
+    //     } catch (error) {
+    //         console.error("Error fetching movies:", error);
+    //     }
+    // };
 
 
 
 
     // Fetch movies on mount
-    useEffect(() => {
-        allMovies();
+    // useEffect(() => {
+    //     allMovies();
 
-    }, []);
+    // }, []);
 
 
 
@@ -57,7 +58,7 @@ const Navbar = () => {
 
 
     // console.log(movies)
-    const forfiltmovietitle = movies.map((e) => {
+    const forfiltmovietitle = movies?.map((e) => {
         return {
           title:  e?.aboutmovieData.title ?? "No Title",
           imageuri:e?.mainmovieData[0].image ?? "No image",
@@ -66,7 +67,7 @@ const Navbar = () => {
         }; // "No Title" if e.title is undefined
     });
     // console.log(forfiltmovietitle)
-    const searcher = forfiltmovietitle.filter((e)=>{
+    const searcher = forfiltmovietitle?.filter((e)=>{
        return  e.title.toLowerCase().includes(querry.toLowerCase().trim())
     })
     // console.log(searcher)
@@ -168,13 +169,13 @@ const Navbar = () => {
                                     onChange={(e) => setquerry(e.target.value)}
                                     placeholder="Search..."
                                     className={`transition-all duration-300 ease-in-out outline-none border-none bg-zinc-900/10 text-white px-2 py-1 rounded-sm hidden sm:block 
-              ${querry.length === 0 ? 'w-0' : 'w-[300px]'} group-focus-within:w-[300px]`}
+              ${querry?.length === 0 ? 'w-0' : 'w-[300px]'} group-focus-within:w-[300px]`}
                                 />
 
                                 <div className='absolute top-10 scro bg-black/80 backdrop-blur-[2px] shadow-xl  shadow-zinc-900 left-0 max-h-72 overflow-y-auto'>
                                     {
                                         querry && (
-                                            searcher.length > 0 ? ( // Check if searcher array has any items
+                                            searcher?.length > 0 ? ( // Check if searcher array has any items
                                                 searcher.map((e, index) => (
                                                     <div style={{ margin: '3px' }} onClick={() => router.push(`/movies/${e.ids}`)} key={index} className='w-full  flex flex-col items-center gap-2'>
                                                         <div className='flex items-center justify-start select-none cursor-pointer hover:bg-neutral-950  w-full'>

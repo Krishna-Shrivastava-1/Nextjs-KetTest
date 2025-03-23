@@ -1,5 +1,6 @@
 'use client'
 import Carusel from '@/component/Carusel';
+import { useEmail } from '@/component/EmailState';
 import Navbar from '@/component/Navbar';
 import SectionofCards from '@/component/SectionofCards';
 import axios from 'axios';
@@ -7,29 +8,29 @@ import { LoaderCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
 
 const page = () => {
-    const [movies, setMovies] = useState([]);
+    // const [movies, setMovies] = useState([]);
     const [newArrOfGenres, setNewArrOfGenres] = useState([]);
-    const [loading, setLoading] = useState(true);
-
+    // const [loading, setLoading] = useState(true);
+const {movies , setLoading,loading} = useEmail()
     // Fetch movies
-    const allMovies = async () => {
-        setLoading(true); // Set loading before fetching
-        try {
-            const res = await axios.get('/api/movies/fetchmoviedata');
-            setMovies(res.data.movies);
-        } catch (error) {
-            console.error("Error fetching movies:", error);
-        }
-    };
+    // const allMovies = async () => {
+    //     setLoading(true); // Set loading before fetching
+    //     try {
+    //         const res = await axios.get('/api/movies/fetchmoviedata');
+    //         setMovies(res.data.movies);
+    //     } catch (error) {
+    //         console.error("Error fetching movies:", error);
+    //     }
+    // };
 
 
 
 
-    // Fetch movies on mount
-    useEffect(() => {
-        allMovies();
+    // // Fetch movies on mount
+    // useEffect(() => {
+    //     allMovies();
 
-    }, []);
+    // }, []);
 
     // console.log(movies)
     const movieimagemergedaboutdat = movies.map((e) => {
@@ -97,7 +98,7 @@ const page = () => {
     return (
         <div>
             <div className='w-full sticky top-0 z-50 bg-black/40'>
-                <Navbar />
+                <Navbar movies={movies} />
             </div>
 
             {loading ? (

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Search } from 'lucide-react';
+import { useEmail } from '@/component/EmailState';
 
 const page = () => {
     const [jwt, setJwt] = useState(null);
@@ -19,27 +20,28 @@ const page = () => {
     }, []);
 
 
-    const [movies, setMovies] = useState([]);
+    // const [movies, setMovies] = useState([]);
     const [querry, setquerry] = useState('');
     const [paycred, setpaycred] = useState(null); // Initialize paycred as null
     const [user, setuser] = useState(null); // Initialize user as null
-    const [loading, setLoading] = useState(false)
+    // const [loading, setLoading] = useState(false)
     const router = useRouter();
     const pathname = usePathname();
+    const {loading,setLoading,movies} =  useEmail()
     // const allmovies = async () => {
     //     const res = await axios.get('http://localhost:5050/movie/getmovie');
     //     setmovies(res.data);
     // };
 
-    const allMovies = async () => {
-        setLoading(true); // Set loading before fetching
-        try {
-            const res = await axios.get('/api/movies/fetchmoviedata');
-            setMovies(res.data.movies);
-        } catch (error) {
-            console.error("Error fetching movies:", error);
-        }
-    };
+    // const allMovies = async () => {
+    //     setLoading(true); // Set loading before fetching
+    //     try {
+    //         const res = await axios.get('/api/movies/fetchmoviedata');
+    //         setMovies(res.data.movies);
+    //     } catch (error) {
+    //         console.error("Error fetching movies:", error);
+    //     }
+    // };
 
 
 
@@ -50,12 +52,12 @@ const page = () => {
 
 
     // Fetch movies on mount
-    useEffect(() => {
-        allMovies();
+    // useEffect(() => {
+    //     allMovies();
 
-    }, []);
+    // }, []);
 
-    console.log(movies)
+    // console.log(movies)
     const forfiltmovietitle = movies.map((e) => {
         return {
             title: e?.aboutmovieData.title ?? "No Title",
@@ -64,11 +66,11 @@ const page = () => {
 
         }; // "No Title" if e.title is undefined
     });
-    console.log(forfiltmovietitle)
+    // console.log(forfiltmovietitle)
     const searcher = forfiltmovietitle.filter((e) => {
         return e.title.toLowerCase().includes(querry.toLowerCase().trim())
     })
-    console.log(searcher)
+    // console.log(searcher)
     // useEffect(() => {
     //     allmovies();
     // }, []);
@@ -139,7 +141,7 @@ const page = () => {
                         <div className='flex flex-col items-center justify-around w-full gap-x-3'>
                             <div style={{ padding: '15px' }} className=" sticky top-0 z-40 flex bg-black/60 backdrop-blur-lg group rounded-sm items-center gap-x-2  w-full p-1">
                                 {/* Search Icon */}
-                                <CircleArrowLeft  className="text-zinc-400 cursor-pointer" onClick={handleGoBack} />
+                                <CircleArrowLeft size={30} className="text-zinc-400 cursor-pointer" onClick={handleGoBack} />
                                 <Search className="text-zinc-400 cursor-pointer" />
 
 
