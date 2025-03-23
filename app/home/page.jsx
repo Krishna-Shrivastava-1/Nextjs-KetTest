@@ -3,6 +3,7 @@ import Carusel from '@/component/Carusel';
 import { useEmail } from '@/component/EmailState';
 import Navbar from '@/component/Navbar';
 import SectionofCards from '@/component/SectionofCards';
+import { useUser } from '@clerk/nextjs';
 import axios from 'axios';
 import { LoaderCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
@@ -12,6 +13,8 @@ const page = () => {
     const [newArrOfGenres, setNewArrOfGenres] = useState([]);
     // const [loading, setLoading] = useState(true);
 const {movies , setLoading,loading} = useEmail()
+ const clerkuser = useUser().user
+    // console.log(clerkuser)
     // Fetch movies
     // const allMovies = async () => {
     //     setLoading(true); // Set loading before fetching

@@ -8,9 +8,13 @@ import axios from 'axios';
 import { Search } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { useEmail } from './EmailState';
+import { useClerk, UserButton, useUser } from '@clerk/nextjs';
 const Navbar = () => {
     const [jwt, setJwt] = useState(null);
-const {movies}  =useEmail()
+    const clerkuser = useUser().user
+    //   console.log(clerkuser.emailAddresses[0].emailAddress)
+    //   console.log(clerkuser.imageUrl)
+    const { movies } = useEmail()
     useEffect(() => {
         if (typeof window !== 'undefined') {
             // Check if window is defined (client-side)
@@ -60,22 +64,22 @@ const {movies}  =useEmail()
     // console.log(movies)
     const forfiltmovietitle = movies?.map((e) => {
         return {
-          title:  e?.aboutmovieData.title ?? "No Title",
-          imageuri:e?.mainmovieData[0].image ?? "No image",
-          ids:e?._id
-        
+            title: e?.aboutmovieData.title ?? "No Title",
+            imageuri: e?.mainmovieData[0].image ?? "No image",
+            ids: e?._id
+
         }; // "No Title" if e.title is undefined
     });
     // console.log(forfiltmovietitle)
-    const searcher = forfiltmovietitle?.filter((e)=>{
-       return  e.title.toLowerCase().includes(querry.toLowerCase().trim())
+    const searcher = forfiltmovietitle?.filter((e) => {
+        return e.title.toLowerCase().includes(querry.toLowerCase().trim())
     })
     // console.log(searcher)
     // useEffect(() => {
     //     allmovies();
     // }, []);
 
-   
+
 
     useEffect(() => {
         if (jwt) {
@@ -119,9 +123,17 @@ const {movies}  =useEmail()
 
     // const searcher = filter.filter((e) => e.title?.toLowerCase().trim().includes(querry.toLowerCase()));
 
-    const logout = () => {
-        localStorage.removeItem('authtoken');
-        router.push('/');
+    const { signOut } = useClerk(); // Clerk sign out function
+
+    const logout = async () => {
+        try {
+            router.replace('/');
+            await signOut();
+            localStorage.removeItem('authtoken');
+            window.location.reload();
+        } catch (error) {
+            console.error('Logout Error:', error);
+        }
     };
 
 
@@ -206,7 +218,14 @@ const {movies}  =useEmail()
                                 <DropdownMenuContent className={`bg-zinc-800 text-zinc-200 border-zinc-700`}>
                                     <DropdownMenuLabel style={{ padding: '4px' }} className={`text-zinc-200`}>My Account</DropdownMenuLabel>
                                     <DropdownMenuSeparator className={`bg-zinc-700`} />
-                                    <DropdownMenuItem style={{ padding: '4px' }} className="hover:bg-zinc-600 "> <p>{user?.user.email}</p></DropdownMenuItem>
+                                    {user ?
+                                        <DropdownMenuItem style={{ padding: '4px' }} className="hover:bg-zinc-600 flex items-center justify-around "><div ><p style={{padding:'3px',paddingLeft:'8px',paddingRight:'8px'}} className='rounded-full font-bold bg-sky-700'>{user?.user?.name?.split('')[0]}</p></div> <p>{user?.user.email}</p></DropdownMenuItem>
+                                        :
+                                        <DropdownMenuItem style={{ padding: '4px' }} className="hover:bg-zinc-600 flex items-center justify-around "> <img className='w-5 h-5 rounded-full' src={clerkuser?.imageUrl} alt="" /> <p>{clerkuser?.emailAddresses[0]?.emailAddress || 'no'}</p></DropdownMenuItem>
+                                    }
+
+
+
                                     <DropdownMenuItem style={{ padding: '4px' }} className="hover:bg-zinc-600 hover:underline cursor-pointer select-none" onClick={logout}><p className=' cursor-pointer select-none'>Logout</p></DropdownMenuItem>
                                     {/* <DropdownMenuItem className="dark:hover:bg-zinc-700">Team</DropdownMenuItem>
     <DropdownMenuItem className="dark:hover:bg-zinc-700">Subscription</DropdownMenuItem> */}

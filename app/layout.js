@@ -3,6 +3,11 @@ import "./globals.css";
 import { EmailProvider } from "@/component/EmailState";
 import AuthGuard from "@/component/AuthGuard";
 import { Analytics } from '@vercel/analytics/next';
+import { dark } from '@clerk/themes'
+import {
+  ClerkProvider
+
+} from '@clerk/nextjs'
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -20,17 +25,23 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <AuthGuard />
-        <EmailProvider>
-           {children}
-           <Analytics />
-        </EmailProvider>
-       
-      </body>
-    </html>
+    <ClerkProvider
+    appearance={{
+      baseTheme: dark,
+    }}>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <AuthGuard />
+          <EmailProvider>
+            {children}
+            <Analytics />
+          </EmailProvider>
+
+        </body>
+      </html>
+    </ClerkProvider>
+
   );
 }

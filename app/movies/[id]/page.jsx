@@ -12,7 +12,7 @@ const page = () => {
 
     const [clickedmovi, setclickedmovi] = useState(null); // Initialize as null
     const { movies } = useEmail()
-    console.log(movies)
+    // console.log(movies)
     const [isplayed, setisplayed] = useState(false)
     const [loading, setloading] = useState(true)
     const { id } = useParams();
