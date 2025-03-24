@@ -8,6 +8,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const SectionofCards = ({ maintit }) => {
   const [movies, setMovies] = useState([]);
@@ -82,14 +83,23 @@ const SectionofCards = ({ maintit }) => {
                     </div>
                   ))
               : filteredMovies.reverse().map((movie) => (
-                  <div key={movie._id} className="p-4 max-w-[215px]">
+                  <div key={movie._id} style={{paddingLeft:'4px',marginLeft:'8px',marginRight:'8px'}} className="p-4 max-w-[215px] ">
                     <Link href={`/movies/${movie._id}`}>
-                      <img
+                    <Image style={{paddingLeft:'4px'}}
+    className="rounded-lg"
+    src={movie?.mainmovieData[0]?.image}
+    alt={movie?.aboutmovieData?.title || 'Movie Poster'}
+    layout="intrinsic"
+    width={200}
+    height={100}
+    objectFit="cover" // Keeps image aspect ratio
+/>
+                      {/* <img
                         className="sm:w-[200px] w-[140px] rounded-lg"
                         src={movie?.mainmovieData[0]?.image}
                         alt={movie?.aboutmovieData?.title || 'Movie Poster'}
-                      />
-                      <h3 className="text-left mt-2 text-wrap">{movie?.aboutmovieData?.title || 'Untitled'}</h3>
+                      /> */}
+                      <h3 style={{marginLeft:'8px',marginRight:'8px'}} className="text-left mt-2 text-wrap">{movie?.aboutmovieData?.title || 'Untitled'}</h3>
                     </Link>
                   </div>
                 ))}

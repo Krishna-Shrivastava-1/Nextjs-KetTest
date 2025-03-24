@@ -5,27 +5,28 @@ import axios from 'axios';
 import { Trash2, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // Import useRouter
+import { useEmail } from './EmailState';
 
 const Rightowner = () => {
-  const [movies, setmovies] = useState([]);
-
+  // const [movies, setmovies] = useState([]);
+const {movies}  =useEmail()
   const [querry, setquerry] = useState('');
   const router = useRouter(); // Use useRouter
 
 
 
-  const fetchMovies = async () => {
-    try {
-      const res = await axios.get('/api/movies/fetchmoviedata'); // Fetch processed movie data
-      setmovies(res.data.movies);
-    } catch (error) {
-      console.error('Error fetching movies:', error);
-    }
-  };
+  // const fetchMovies = async () => {
+  //   try {
+  //     const res = await axios.get('/api/movies/fetchmoviedata'); // Fetch processed movie data
+  //     setmovies(res.data.movies);
+  //   } catch (error) {
+  //     console.error('Error fetching movies:', error);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchMovies();
-  }, []);
+  // useEffect(() => {
+  //   fetchMovies();
+  // }, []);
 
   const logout = () => {
     localStorage.removeItem('ownertoken');
@@ -69,8 +70,9 @@ const Rightowner = () => {
 // console.log(searcher)
   return (
     <div style={{ padding: '4px' }} className="w-full ">
-      <div className="flex items-center justify-around">
+      <div style={{padding:'4px'}} className="flex items-center justify-around sticky top-0 bg-black">
         <h2>All Movies</h2>
+        <h3>Total movie : {movies.length}</h3>
         <input
           className="outline-none border-none bg-zinc-900"
           value={querry}
