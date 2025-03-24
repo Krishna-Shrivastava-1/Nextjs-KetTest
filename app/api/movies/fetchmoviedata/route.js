@@ -80,7 +80,7 @@
 // }
 
 
-
+// only implmented Redis
 // import { database } from '@/lib/dbConnect';
 // import { movieModel } from '@/Models/Movies';
 // import { client } from '@/lib/redis';
@@ -147,80 +147,144 @@
 // }
 
 
+// Rate limited and redis
+// import { database } from '@/lib/dbConnect';
+// import { movieModel } from '@/Models/Movies';
+// import { client } from '@/lib/redis';
+// import axios from 'axios';
+
+// // Helper function to add delay
+// const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// export async function GET() {
+//     try {
+//         await database(); // Connect to MongoDB
+
+//         // Check if data is cached in Redis
+//         const cachedMovies = await client.get('movies');
+//         if (cachedMovies) {
+//             console.log("🔹 Returning cached movies from Redis");
+//             return Response.json({ success: true, movies: JSON.parse(cachedMovies) }, { status: 200 });
+//         }
+
+//         const movies = await movieModel.find();
+//         const batchSize = 10; // Fetch movies in batches of 10
+//         let moviesWithDetails = [];
+
+//         for (let i = 0; i < movies.length; i += batchSize) {
+//             const batch = movies.slice(i, i + batchSize);
+
+//             const batchResults = await Promise.all(
+//                 batch.map(async (movie) => {
+//                     let aboutmovieData = 'nothing';
+//                     let mainmovieData = 'nothing';
+
+//                     try {
+//                         if (movie.aboutmovieurl) {
+//                             const aboutRes = await axios.get(movie.aboutmovieurl);
+//                             aboutmovieData = aboutRes.data;
+//                         }
+//                     } catch (error) {
+//                         console.error(`Error fetching aboutmovie for ${movie._id}:`, error);
+//                     }
+
+//                     try {
+//                         if (movie.mainmovieurl) {
+//                             const mainRes = await axios.get(movie.mainmovieurl);
+//                             mainmovieData = mainRes.data;
+//                         }
+//                     } catch (error) {
+//                         console.error(`Error fetching mainmovie for ${movie._id}:`, error);
+//                     }
+
+//                     return {
+//                         ...movie._doc, // Return other movie fields
+//                         aboutmovieData,
+//                         mainmovieData,
+//                     };
+//                 })
+//             );
+
+//             moviesWithDetails.push(...batchResults);
+
+//             console.log(`✅ Processed batch ${i / batchSize + 1}`);
+
+//             // Delay before the next batch
+//             await delay(3000); // 3-second delay to prevent being flagged
+//         }
+
+//         // Store result in Redis for 3.5 hours (12600 seconds)
+//         await client.set('movies', JSON.stringify(moviesWithDetails), { EX: 12600 });
+
+//         console.log("✅ Fetched movies from MongoDB and stored in Redis");
+
+//         return Response.json({ success: true, movies: moviesWithDetails }, { status: 200 });
+//     } catch (error) {
+//         console.error('Error fetching movies:', error);
+//         return Response.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+//     }
+// }
+
+
+// redis and rate limit and proxy server
 
 import { database } from '@/lib/dbConnect';
 import { movieModel } from '@/Models/Movies';
 import { client } from '@/lib/redis';
 import axios from 'axios';
 
-// Helper function to add delay
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-export async function GET() {
+const fetchFromProxy = async (url) => {
     try {
-        await database(); // Connect to MongoDB
-
-        // Check if data is cached in Redis
-        const cachedMovies = await client.get('movies');
-        if (cachedMovies) {
-            console.log("🔹 Returning cached movies from Redis");
-            return Response.json({ success: true, movies: JSON.parse(cachedMovies) }, { status: 200 });
-        }
-
-        const movies = await movieModel.find();
-        const batchSize = 10; // Fetch movies in batches of 10
-        let moviesWithDetails = [];
-
-        for (let i = 0; i < movies.length; i += batchSize) {
-            const batch = movies.slice(i, i + batchSize);
-
-            const batchResults = await Promise.all(
-                batch.map(async (movie) => {
-                    let aboutmovieData = 'nothing';
-                    let mainmovieData = 'nothing';
-
-                    try {
-                        if (movie.aboutmovieurl) {
-                            const aboutRes = await axios.get(movie.aboutmovieurl);
-                            aboutmovieData = aboutRes.data;
-                        }
-                    } catch (error) {
-                        console.error(`Error fetching aboutmovie for ${movie._id}:`, error);
-                    }
-
-                    try {
-                        if (movie.mainmovieurl) {
-                            const mainRes = await axios.get(movie.mainmovieurl);
-                            mainmovieData = mainRes.data;
-                        }
-                    } catch (error) {
-                        console.error(`Error fetching mainmovie for ${movie._id}:`, error);
-                    }
-
-                    return {
-                        ...movie._doc, // Return other movie fields
-                        aboutmovieData,
-                        mainmovieData,
-                    };
-                })
-            );
-
-            moviesWithDetails.push(...batchResults);
-
-            console.log(`✅ Processed batch ${i / batchSize + 1}`);
-
-            // Delay before the next batch
-            await delay(3000); // 3-second delay to prevent being flagged
-        }
-
-        // Store result in Redis for 3.5 hours (12600 seconds)
-        await client.set('movies', JSON.stringify(moviesWithDetails), { EX: 12600 });
-
-        console.log("✅ Fetched movies from MongoDB and stored in Redis");
-
-        return Response.json({ success: true, movies: moviesWithDetails }, { status: 200 });
+      const response = await axios.get(`/api/proxy?url=${encodeURIComponent(url)}`);
+      return response.data;
     } catch (error) {
-        console.error('Error fetching movies:', error);
-        return Response.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+      console.error("Proxy Fetch Error:", error.message);
+      return "nothing"; // Default value if request fails
     }
-}
+  };
+  
+  export async function GET() {
+    try {
+      await database(); // Connect to MongoDB
+  
+      const cachedMovies = await client.get("movies");
+      if (cachedMovies) {
+        console.log("🔹 Returning cached movies from Redis");
+        return Response.json({ success: true, movies: JSON.parse(cachedMovies) }, { status: 200 });
+      }
+  
+      const movies = await movieModel.find();
+      const batchSize = 10;
+      let moviesWithDetails = [];
+  
+      for (let i = 0; i < movies.length; i += batchSize) {
+        const batch = movies.slice(i, i + batchSize);
+  
+        const batchResults = await Promise.all(
+          batch.map(async (movie) => {
+            let aboutmovieData = await fetchFromProxy(movie.aboutmovieurl);
+            let mainmovieData = await fetchFromProxy(movie.mainmovieurl);
+  
+            return {
+              ...movie._doc,
+              aboutmovieData,
+              mainmovieData,
+            };
+          })
+        );
+  
+        moviesWithDetails.push(...batchResults);
+        console.log(`✅ Processed batch ${i / batchSize + 1}`);
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // 3s delay
+      }
+  
+      await client.set("movies", JSON.stringify(moviesWithDetails), { EX: 12600 });
+      console.log("✅ Fetched movies from MongoDB and stored in Redis");
+  
+      return Response.json({ success: true, movies: moviesWithDetails }, { status: 200 });
+    } catch (error) {
+      console.error("Error fetching movies:", error);
+      return Response.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+    }
+  }
+  
