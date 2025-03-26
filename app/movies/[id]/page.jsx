@@ -70,7 +70,7 @@ const page = () => {
     }, [id]);
   
 const sentmovietocontinouswatch = async()=>{
-    await axios.post('http://localhost:3000/api/continuewatch/addnewwatch',{
+    await axios.post('/api/continuewatch/addnewwatch',{
         userId:user?.user?._id,
         id:id
     })

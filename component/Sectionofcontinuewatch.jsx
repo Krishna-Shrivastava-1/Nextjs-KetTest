@@ -41,7 +41,7 @@ const Sectionofcontinuewatch = ({ movies: initialMovies, user }) => {
     // console.log("Deleting movie:", id, "for user:", user?.user?._id);
 
     try {
-      await axios.delete('http://localhost:3000/api/continuewatch/deletecontinuewatch', {
+      await axios.delete('/api/continuewatch/deletecontinuewatch', {
         data: {  // ✅ Pass `data` correctly
           userId: user?.user?._id,
           id: id
