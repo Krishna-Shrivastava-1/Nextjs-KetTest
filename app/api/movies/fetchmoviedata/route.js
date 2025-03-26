@@ -148,7 +148,7 @@
 
 
 // Rate limited and redis
-// 1 =======>
+// 2 =======>
     import { database } from '@/lib/dbConnect';
 import { movieModel } from '@/Models/Movies';
 import { client } from '@/lib/redis';
@@ -160,88 +160,78 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function GET(req) {
     try {
-        await database(); // Connect to MongoDB
-        // await client.del("movies");
-        // Check Redis cache first
+        await database(); // ✅ Connect to MongoDB
+
+        // ✅ Check Redis cache first
         const cachedMovies = await client.get('movies');
         if (cachedMovies) {
             console.log("🔹 Returning cached movies from Redis");
             return Response.json({ success: true, movies: JSON.parse(cachedMovies) }, { status: 200 });
         }
 
-        const batchSizeMongo = 50; // Fetch 50 documents per batch from MongoDB
-        const batchSizeAPI = 10;   // Fetch 10 movies per batch from netfree.cc API
-        let allMoviesWithDetails = [];
+        console.log("🟢 Fetching movies from MongoDB...");
+        const batchSize = 50; // ✅ Fetch movies in smaller batches to avoid timeout
         let skip = 0;
+        let allMoviesWithDetails = [];
 
         while (true) {
-            // Fetch 50 movies at a time from MongoDB
-            const movies = await movieModel.find().skip(skip).limit(batchSizeMongo);
-            if (movies.length === 0) break; // Stop when no more movies
+            const movies = await movieModel.find().skip(skip).limit(batchSize);
+            if (movies.length === 0) break; // ✅ Stop when no more movies
 
-            console.log(`🔹 Fetching batch of ${movies.length} movies from MongoDB`);
+            console.log(`🔹 Fetching batch of ${movies.length} movies from MongoDB...`);
 
-            let moviesWithDetails = [];
+            let batchResults = [];
+            for (let i = 0; i < movies.length; i++) {
+                const movie = movies[i];
+                let aboutmovieData = 'nothing';
+                let mainmovieData = 'nothing';
 
-            for (let i = 0; i < movies.length; i += batchSizeAPI) {
-                const batch = movies.slice(i, i + batchSizeAPI);
+                try {
+                    if (movie.aboutmovieurl) {
+                        const aboutRes = await axios.get(movie.aboutmovieurl, { timeout: 5000 });
+                        aboutmovieData = aboutRes.data;
+                    }
+                } catch (error) {
+                    console.error(`❌ Error fetching aboutmovie for ${movie._id}:`, error.message);
+                }
 
-                const batchResults = await Promise.allSettled(
-                    batch.map(async (movie) => {
-                        let aboutmovieData = 'nothing';
-                        let mainmovieData = 'nothing';
+                try {
+                    if (movie.mainmovieurl) {
+                        const mainRes = await axios.get(movie.mainmovieurl, { timeout: 5000 });
+                        mainmovieData = mainRes.data;
+                    }
+                } catch (error) {
+                    console.error(`❌ Error fetching mainmovie for ${movie._id}:`, error.message);
+                }
 
-                        try {
-                            if (movie.aboutmovieurl) {
-                                const aboutRes = await axiosInstance.get(movie.aboutmovieurl);
-                                aboutmovieData = aboutRes.data;
-                            }
-                        } catch (error) {
-                            console.error(`❌ Error fetching aboutmovie for ${movie._id}:`, error);
-                        }
+                batchResults.push({
+                    ...movie._doc,
+                    aboutmovieData,
+                    mainmovieData,
+                });
 
-                        try {
-                            if (movie.mainmovieurl) {
-                                const mainRes = await axios.get(movie.mainmovieurl);
-                                mainmovieData = mainRes.data;
-                            }
-                        } catch (error) {
-                            console.error(`❌ Error fetching mainmovie for ${movie._id}:`, error);
-                        }
-
-                        return {
-                            ...movie._doc, // MongoDB document data
-                            aboutmovieData,
-                            mainmovieData,
-                        };
-                    })
-                );
-
-                moviesWithDetails.push(...batchResults);
-                console.log(`✅ Processed API batch ${i / batchSizeAPI + 1}`);
-
-                await delay(3000); // 3-second delay to avoid getting flagged
+                await delay(2000); // ✅ Delay 2 seconds per request to prevent flagging
             }
 
-            allMoviesWithDetails.push(...moviesWithDetails);
-            skip += batchSizeMongo; // Move to next batch in MongoDB
+            allMoviesWithDetails.push(...batchResults);
+            skip += batchSize; // ✅ Move to next batch in MongoDB
 
-            console.log(`🚀 Completed processing MongoDB batch, total movies: ${allMoviesWithDetails.length}`);
+            console.log(`🚀 Processed batch, total movies so far: ${allMoviesWithDetails.length}`);
         }
 
-        // Cache data in Redis for 2 hours
+        // ✅ Store in Redis with a 2-hour expiry
         await client.set('movies', JSON.stringify(allMoviesWithDetails), { EX: 7200 });
-
         console.log("✅ Stored fetched movies in Redis");
 
         return Response.json({ success: true, movies: allMoviesWithDetails }, { status: 200 });
 
     } catch (error) {
-        console.error('❌ Error fetching movies:', error);
+        console.error('❌ Server Error:', error);
         return Response.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
     }
 }
-//#2 import { database } from '@/lib/dbConnect';
+
+//#1 import { database } from '@/lib/dbConnect';
 // import { movieModel } from '@/Models/Movies';
 // import { client } from '@/lib/redis';
 // import axios from 'axios';
