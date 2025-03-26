@@ -155,12 +155,15 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+// const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function GET(req) {
+    const startTime = Date.now(); // Track execution time
+    const timeoutLimit = 9000; // 9 seconds
+
     try {
         await database(); // Connect to MongoDB
-        // await client.del("movies");
+
         // Check Redis cache first
         const cachedMovies = await client.get('movies');
         if (cachedMovies) {
@@ -168,71 +171,74 @@ export async function GET(req) {
             return Response.json({ success: true, movies: JSON.parse(cachedMovies) }, { status: 200 });
         }
 
-        const batchSizeMongo = 50; // Fetch 50 documents per batch from MongoDB
-        const batchSizeAPI = 10;   // Fetch 10 movies per batch from netfree.cc API
+        const batchSizeMongo = 50; // Fetch 50 movies per batch
+        const batchSizeAPI = 10;   // Fetch 10 movies per batch
         let allMoviesWithDetails = [];
         let skip = 0;
 
         while (true) {
-            // Fetch 50 movies at a time from MongoDB
+            if (Date.now() - startTime > timeoutLimit) {
+                console.warn("⚠️ Stopping execution due to timeout");
+                break;
+            }
+
             const movies = await movieModel.find().skip(skip).limit(batchSizeMongo);
-            if (movies.length === 0) break; // Stop when no more movies
+            if (movies.length === 0) break;
 
             console.log(`🔹 Fetching batch of ${movies.length} movies from MongoDB`);
 
             let moviesWithDetails = [];
 
-            for (let i = 0; i < movies.length; i += batchSizeAPI) {
-                const batch = movies.slice(i, i + batchSizeAPI);
+            // Fetch movie details **concurrently** to reduce execution time
+            const batchResults = await Promise.allSettled(
+                movies.map(async (movie) => {
+                    if (Date.now() - startTime > timeoutLimit) return null;
 
-                const batchResults = await Promise.all(
-                    batch.map(async (movie) => {
-                        let aboutmovieData = 'nothing';
-                        let mainmovieData = 'nothing';
+                    let aboutmovieData = 'nothing';
+                    let mainmovieData = 'nothing';
 
-                        try {
-                            if (movie.aboutmovieurl) {
-                                const aboutRes = await axios.get(movie.aboutmovieurl);
-                                aboutmovieData = aboutRes.data;
-                            }
-                        } catch (error) {
-                            console.error(`❌ Error fetching aboutmovie for ${movie._id}:`, error);
+                    try {
+                        if (movie.aboutmovieurl) {
+                            const aboutRes = await axios.get(movie.aboutmovieurl, { timeout: 5000 });
+                            aboutmovieData = aboutRes.data;
                         }
+                    } catch (error) {
+                        console.error(`❌ Error fetching aboutmovie for ${movie._id}:`, error.message);
+                    }
 
-                        try {
-                            if (movie.mainmovieurl) {
-                                const mainRes = await axios.get(movie.mainmovieurl);
-                                mainmovieData = mainRes.data;
-                            }
-                        } catch (error) {
-                            console.error(`❌ Error fetching mainmovie for ${movie._id}:`, error);
+                    try {
+                        if (movie.mainmovieurl) {
+                            const mainRes = await axios.get(movie.mainmovieurl, { timeout: 5000 });
+                            mainmovieData = mainRes.data;
                         }
+                    } catch (error) {
+                        console.error(`❌ Error fetching mainmovie for ${movie._id}:`, error.message);
+                    }
 
-                        return {
-                            ...movie._doc, // MongoDB document data
-                            aboutmovieData,
-                            mainmovieData,
-                        };
-                    })
-                );
+                    return { ...movie._doc, aboutmovieData, mainmovieData };
+                })
+            );
 
-                moviesWithDetails.push(...batchResults);
-                console.log(`✅ Processed API batch ${i / batchSizeAPI + 1}`);
-
-                await delay(3000); // 3-second delay to avoid getting flagged
-            }
+            // Filter out failed promises
+            moviesWithDetails = batchResults
+                .filter(result => result.status === "fulfilled" && result.value !== null)
+                .map(result => result.value);
 
             allMoviesWithDetails.push(...moviesWithDetails);
-            skip += batchSizeMongo; // Move to next batch in MongoDB
+            skip += batchSizeMongo;
 
-            console.log(`🚀 Completed processing MongoDB batch, total movies: ${allMoviesWithDetails.length}`);
+            console.log(`🚀 Processed ${allMoviesWithDetails.length} movies`);
+
+            if (Date.now() - startTime > timeoutLimit) {
+                console.warn("⚠️ Stopping execution due to timeout");
+                break;
+            }
         }
 
-        // Cache data in Redis for 2 hours
+        // Store in Redis for caching
         await client.set('movies', JSON.stringify(allMoviesWithDetails), { EX: 7200 });
 
         console.log("✅ Stored fetched movies in Redis");
-
         return Response.json({ success: true, movies: allMoviesWithDetails }, { status: 200 });
 
     } catch (error) {
@@ -240,6 +246,90 @@ export async function GET(req) {
         return Response.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+// export async function GET(req) {
+//     try {
+//         await database(); // Connect to MongoDB
+//         // await client.del("movies");
+//         // Check Redis cache first
+//         const cachedMovies = await client.get('movies');
+//         if (cachedMovies) {
+//             console.log("🔹 Returning cached movies from Redis");
+//             return Response.json({ success: true, movies: JSON.parse(cachedMovies) }, { status: 200 });
+//         }
+
+//         const batchSizeMongo = 50; // Fetch 50 documents per batch from MongoDB
+//         const batchSizeAPI = 10;   // Fetch 10 movies per batch from netfree.cc API
+//         let allMoviesWithDetails = [];
+//         let skip = 0;
+
+//         while (true) {
+//             // Fetch 50 movies at a time from MongoDB
+//             const movies = await movieModel.find().skip(skip).limit(batchSizeMongo);
+//             if (movies.length === 0) break; // Stop when no more movies
+
+//             console.log(`🔹 Fetching batch of ${movies.length} movies from MongoDB`);
+
+//             let moviesWithDetails = [];
+
+//             for (let i = 0; i < movies.length; i += batchSizeAPI) {
+//                 const batch = movies.slice(i, i + batchSizeAPI);
+
+//                 const batchResults = await Promise.all(
+//                     batch.map(async (movie) => {
+//                         let aboutmovieData = 'nothing';
+//                         let mainmovieData = 'nothing';
+
+//                         try {
+//                             if (movie.aboutmovieurl) {
+//                                 const aboutRes = await axios.get(movie.aboutmovieurl);
+//                                 aboutmovieData = aboutRes.data;
+//                             }
+//                         } catch (error) {
+//                             console.error(`❌ Error fetching aboutmovie for ${movie._id}:`, error);
+//                         }
+
+//                         try {
+//                             if (movie.mainmovieurl) {
+//                                 const mainRes = await axios.get(movie.mainmovieurl);
+//                                 mainmovieData = mainRes.data;
+//                             }
+//                         } catch (error) {
+//                             console.error(`❌ Error fetching mainmovie for ${movie._id}:`, error);
+//                         }
+
+//                         return {
+//                             ...movie._doc, // MongoDB document data
+//                             aboutmovieData,
+//                             mainmovieData,
+//                         };
+//                     })
+//                 );
+
+//                 moviesWithDetails.push(...batchResults);
+//                 console.log(`✅ Processed API batch ${i / batchSizeAPI + 1}`);
+
+//                 await delay(3000); // 3-second delay to avoid getting flagged
+//             }
+
+//             allMoviesWithDetails.push(...moviesWithDetails);
+//             skip += batchSizeMongo; // Move to next batch in MongoDB
+
+//             console.log(`🚀 Completed processing MongoDB batch, total movies: ${allMoviesWithDetails.length}`);
+//         }
+
+//         // Cache data in Redis for 2 hours
+//         await client.set('movies', JSON.stringify(allMoviesWithDetails), { EX: 7200 });
+
+//         console.log("✅ Stored fetched movies in Redis");
+
+//         return Response.json({ success: true, movies: allMoviesWithDetails }, { status: 200 });
+
+//     } catch (error) {
+//         console.error('❌ Error fetching movies:', error);
+//         return Response.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+//     }
+// }
 
 // import { database } from '@/lib/dbConnect';
 // import { movieModel } from '@/Models/Movies';
