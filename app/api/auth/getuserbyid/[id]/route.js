@@ -3,9 +3,9 @@ import { database } from "@/lib/dbConnect";
 import { userModel } from "@/Models/User";
 import { NextResponse } from "next/server";
 
-export async function GET(req, context) {  
-    const { params } = context;  // ✅ Correct way to access params in App Router
-    const id = params.id;  
+export async function GET(req, {params}) {  
+    // ✅ Correct way to access params in App Router
+    const {id} = params;  
 
     try {
         await database();

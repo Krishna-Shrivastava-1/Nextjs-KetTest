@@ -455,8 +455,9 @@ const VideoPlayer = ({ src, setcross }) => {
                 {/* Subtitle Selection */}
 
             </div>
+            {/* mobile */}
             <div style={{ paddingBottom: '10px', paddingLeft: '10px', paddingRight: '10px' }}
-                className={`w-full bg-black/60 p-2 rounded-md md:hidden flex flex-col items-center transition-all duration-300
+                className={`w-full z-30 bg-black/60 p-2 rounded-md md:hidden flex flex-col items-center transition-all duration-300
   ${isFullscreen ? " absolute bottom-[8%]" : "bottom-0"} 
   ${showControls || !isFullscreen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             >

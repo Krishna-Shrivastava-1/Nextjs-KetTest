@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  continuewatching: {
+    type: [String], // ✅ Ensure it's explicitly an array of strings
+    default: []     // ✅ Explicitly set the default value
+  }
+,
   createdAt: {
     type: Date,
     default: Date.now,

@@ -219,7 +219,7 @@ const Navbar = () => {
                                     <DropdownMenuLabel style={{ padding: '4px' }} className={`text-zinc-200`}>My Account</DropdownMenuLabel>
                                     <DropdownMenuSeparator className={`bg-zinc-700`} />
                                     {user ?
-                                        <DropdownMenuItem style={{ padding: '4px' }} className="hover:bg-zinc-600 flex items-center justify-around "><div ><p style={{padding:'3px',paddingLeft:'8px',paddingRight:'8px'}} className='rounded-full font-bold bg-sky-700'>{user?.user?.name?.split('')[0]}</p></div> <p>{user?.user.email}</p></DropdownMenuItem>
+                                        <DropdownMenuItem style={{ padding: '4px' }} className="hover:bg-zinc-600 flex items-center justify-around "><div ><p style={{padding:'3px',paddingLeft:'8px',paddingRight:'8px'}} className='rounded-full font-bold bg-sky-700'>{user?.user?.name?.split('')[0].toUpperCase()}</p></div> <p>{user?.user.email}</p></DropdownMenuItem>
                                         :
                                         <DropdownMenuItem style={{ padding: '4px' }} className="hover:bg-zinc-600 flex items-center justify-around "> <img className='w-5 h-5 rounded-full' src={clerkuser?.imageUrl} alt="" /> <p>{clerkuser?.emailAddresses[0]?.emailAddress || 'no'}</p></DropdownMenuItem>
                                     }

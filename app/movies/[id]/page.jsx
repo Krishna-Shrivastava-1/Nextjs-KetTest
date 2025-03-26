@@ -13,9 +13,12 @@ const page = () => {
     const [clickedmovi, setclickedmovi] = useState(null); // Initialize as null
     const { movies } = useEmail()
     // console.log(movies)
+     const [paycred, setpaycred] = useState(null); // Initialize paycred as null
+        const [user, setuser] = useState(null); // Initialize user as null
     const [isplayed, setisplayed] = useState(false)
     const [loading, setloading] = useState(true)
     const { id } = useParams();
+    const [jwt, setJwt] = useState(null);
     const [showcross, setshowcross] = useState(true)
     const getmovi = async () => {
         try {
@@ -26,13 +29,52 @@ const page = () => {
             console.error('Error fetching movie:', error);
         }
     };
-
-
+  useEffect(() => {
+        if (typeof window !== 'undefined') {
+            // Check if window is defined (client-side)
+            const token = localStorage.getItem('authtoken');
+            setJwt(token);
+        }
+    }, []);
+    useEffect(() => {
+        if (jwt) {
+            const parts = jwt.split('.');
+            if (parts.length === 3) {
+                try {
+                    const payload = JSON.parse(atob(parts[1].replace('-', '+').replace('_', '/')));
+                    setpaycred(payload);
+                } catch (error) {
+                    console.error('Error decoding JWT:', error);
+                }
+            } else {
+                console.error('Invalid JWT format');
+            }
+        }
+    }, [jwt]);
+    useEffect(() => {
+        const loggeduser = async () => {
+            if (paycred && paycred.id) {
+                try {
+                    const reps = await axios.get(`/api/auth/getuserbyid/${paycred?.id}`);
+                    setuser(reps.data);
+                } catch (error) {
+                    console.error('Error fetching user:', error);
+                }
+            }
+        };
+        loggeduser();
+    }, [paycred]);
 
     useEffect(() => {
         getmovi();
     }, [id]);
-
+  
+const sentmovietocontinouswatch = async()=>{
+    await axios.post('http://localhost:3000/api/continuewatch/addnewwatch',{
+        userId:user?.user?._id,
+        id:id
+    })
+}
 
 
     // console.log(clickedmovi);
@@ -90,7 +132,10 @@ const page = () => {
                                         <p className='text-lg font-semibold'>{clickedmovi && clickedmovi?.aboutmovieData?.genre}</p>
 
                                     </div>
-                                    <div onClick={() => setisplayed(true)} style={{ padding: '6px', paddingLeft: '6px', paddingRight: '6px' }} className='bg-zinc-400/60 w-[120px] cursor-pointer select-none flex items-center justify-around rounded-md hover:bg-white hover:text-black transition-all duration-500'>
+                                    <div onClick={() => {
+                                        setisplayed(true)
+                                        sentmovietocontinouswatch()
+                                        }} style={{ padding: '6px', paddingLeft: '6px', paddingRight: '6px' }} className='bg-zinc-400/60 w-[120px] cursor-pointer select-none flex items-center justify-around rounded-md hover:bg-white hover:text-black transition-all duration-500'>
                                         <FaPlay className='text-4xl' />
                                         <h2 className='text-lg font-bold'>Play</h2>
                                     </div>
@@ -155,9 +200,9 @@ const page = () => {
                                             <div>
                                                 <h2 className='font-bold'>Cast</h2>
                                                 <p>{clickedmovi && clickedmovi?.aboutmovieData?.cast}</p>
-                                                <div className='flex items-center '><h2 className='font-bold'>Writer : </h2>
+                                                <div className='flex items-center '><h2 className='font-bold'>Writer: </h2>
                                                     <p>{clickedmovi && clickedmovi?.aboutmovieData?.writer}</p></div>
-                                                <div className='flex items-center '> <h2 className='font-bold'>Director : </h2>
+                                                <div className='flex items-center '> <h2 className='font-bold'>Director: </h2>
                                                     <p>{clickedmovi && clickedmovi?.aboutmovieData?.director}</p></div>
                                             </div>
 

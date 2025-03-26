@@ -14,6 +14,11 @@ const movieSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    // wacthingby: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'User',
+    //     required: true
+    // },
     createdAt: {
         type: Date,
         default: Date.now

@@ -16,16 +16,16 @@ export const EmailProvider = ({ children }) => {
 
       const res = await axios.get('/api/movies/fetchmoviedata');
       setMovies(res.data.movies);
+      // setLoading(false)
   } catch (error) {
       console.error('Error fetching movies:', error);
   }
-  };
+};
 
-  // Fetch movies on mount
-  useEffect(() => {
-    allMovies();
-
-  }, []);
+// ✅ Ensure useEffect sets loading correctly on mount
+useEffect(() => {
+allMovies();
+}, []);
   return (
     <EmailContext.Provider value={{ email, setEmail, movies, loading, setLoading }}>
       {children}
