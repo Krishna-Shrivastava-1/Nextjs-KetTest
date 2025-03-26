@@ -3,6 +3,7 @@ import "./globals.css";
 import { EmailProvider } from "@/component/EmailState";
 import AuthGuard from "@/component/AuthGuard";
 import { Analytics } from '@vercel/analytics/next';
+
 import { dark } from '@clerk/themes'
 import {
   ClerkProvider
@@ -37,6 +38,7 @@ export default function RootLayout({ children }) {
           <EmailProvider>
             {children}
             <Analytics />
+            
           </EmailProvider>
 
         </body>

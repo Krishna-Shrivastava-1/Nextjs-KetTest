@@ -1,4 +1,5 @@
 import { database } from '@/lib/dbConnect';
+import { client } from '@/lib/redis';
 import { movieModel } from '@/Models/Movies';
 
 import { NextResponse } from 'next/server';
@@ -22,7 +23,7 @@ export async function POST(req) {
       aboutmovieurl,
       movieimageurl,
     });
-
+    // await client.del("movies");
     return NextResponse.json(
       { message: 'Movie added successfully', success: true, movie: saveurl },
       { status: 201 }

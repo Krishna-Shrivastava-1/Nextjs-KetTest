@@ -58,22 +58,22 @@ const page = () => {
 
                         <div  >
                             <div style={{ width: '100%', aspectRatio: '16/9' }}> {/* Adjust aspectRatio as needed */}
-                            <Image
+                            {/* <Image
   src={clickedmovi?.mainmovieData[0]?.image}
   alt="Movie Image"
     layout="fill"
   objectFit="cover"
   className="masker"
-/>
-                                {/* <img
+/> */}
+                                <img
                                     src={clickedmovi?.mainmovieData[0]?.image}
                                     alt=""
 
 
 
                                     style={{ objectFit: 'cover' }} // Or objectFit: 'contain'
-                                    className='masker'
-                                /> */}
+                                    className='masker w-full'
+                                />
                             </div>
                             <div className='absolute top-[10%] md:top-[30%] left-5 md:left-26'>
                                 <div className='md:min-w-[55%] relative w-full '>

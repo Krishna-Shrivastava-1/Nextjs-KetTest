@@ -20,7 +20,7 @@
 //   matcher: ['/home', '/author'], // Routes to protect
 // };
 
-
+// aactuall
 import {clerkMiddleware} from "@clerk/nextjs/server"
 
 export default clerkMiddleware({

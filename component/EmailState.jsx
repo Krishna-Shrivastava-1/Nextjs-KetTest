@@ -11,12 +11,14 @@ export const EmailProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const allMovies = async () => {
     setLoading(true); // Set loading before fetching
+//  const apikey = process.env.NEXT_PUBLIC_API_KEY
     try {
+
       const res = await axios.get('/api/movies/fetchmoviedata');
       setMovies(res.data.movies);
-    } catch (error) {
-      console.error("Error fetching movies:", error);
-    }
+  } catch (error) {
+      console.error('Error fetching movies:', error);
+  }
   };
 
   // Fetch movies on mount
