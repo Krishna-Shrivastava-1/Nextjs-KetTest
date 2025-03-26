@@ -185,14 +185,14 @@ export async function GET(req) {
             for (let i = 0; i < movies.length; i += batchSizeAPI) {
                 const batch = movies.slice(i, i + batchSizeAPI);
 
-                const batchResults = await Promise.all(
+                const batchResults = await Promise.allSettled(
                     batch.map(async (movie) => {
                         let aboutmovieData = 'nothing';
                         let mainmovieData = 'nothing';
 
                         try {
                             if (movie.aboutmovieurl) {
-                                const aboutRes = await axios.get(movie.aboutmovieurl);
+                                const aboutRes = await axiosInstance.get(movie.aboutmovieurl);
                                 aboutmovieData = aboutRes.data;
                             }
                         } catch (error) {
